@@ -83,19 +83,16 @@ class HomeController extends GetxController
   void GetData() async
   {
     TodoList.value = await TodoDatabase.todoDatabase.ReadData();
-    print("===== ${TodoList[0]['id']}");
   }
 
   void GetData2() async
   {
     DoneList.value = await DoneDatabase.doneDatabase.ReadData();
-    print("===== ${TodoList[0]['id']}");
   }
 
   void CheckLogin() async
   {
     bool? check = await ReadIsLogin();
-    print("======= $check");
     Timer(Duration(seconds: 3), () {
       if(check != null)
       {

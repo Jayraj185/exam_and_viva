@@ -40,6 +40,8 @@ class _TodoPageState extends State<TodoPage> {
           actions: [
             IconButton(
               onPressed: () {
+                homeController.txtTask.value.clear();
+                homeController.txtCategory.value.clear();
                 Get.defaultDialog(
                   title: "New Task",
                   content: Form(
@@ -182,7 +184,7 @@ class _TodoPageState extends State<TodoPage> {
                                 onPressed: (context) {
                                   DoneDatabase.doneDatabase.InsertData(task: homeController.TodoList[index]['task'], category: homeController.TodoList[index]['category']);
                                   homeController.GetData2();
-                                  TodoDatabase.todoDatabase.DeleteData(id: index==0?1:index+1);
+                                  TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
                                   homeController.GetData();
                                 },
                                 icon: Icons.done_all,
@@ -231,7 +233,6 @@ class _TodoPageState extends State<TodoPage> {
                                                 controller: homeController.txtCategory.value,
                                                 decoration: InputDecoration(
                                                     hintText: "Choose Category",
-
                                                     border: OutlineInputBorder(
                                                         borderRadius: BorderRadius.circular(15),
                                                         borderSide: BorderSide(color: Colors.grey)
@@ -259,7 +260,7 @@ class _TodoPageState extends State<TodoPage> {
                                                   if(homeController.key.value.currentState!.validate())
                                                   {
                                                     print("==== Start");
-                                                    TodoDatabase.todoDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: index==0?1:index+1);
+                                                    TodoDatabase.todoDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.TodoList[index]['id']);
                                                     print("==== End");
                                                     homeController.GetData();
                                                     Get.back();
@@ -282,7 +283,7 @@ class _TodoPageState extends State<TodoPage> {
                               ),
                               SlidableAction(
                                 onPressed: (context) {
-                                  TodoDatabase.todoDatabase.DeleteData(id: index==0?1:index+1);
+                                  TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
                                   homeController.GetData();
                                 },
                                 icon: Icons.delete,
@@ -364,8 +365,8 @@ class _TodoPageState extends State<TodoPage> {
                           children: [
                             SlidableAction(
                               onPressed: (context) {
-                                homeController.txtTask.value = TextEditingController(text: "${homeController.TodoList[index]['task']}");
-                                homeController.txtCategory.value = TextEditingController(text: "${homeController.TodoList[index]['category']}");
+                                homeController.txtTask.value = TextEditingController(text: "${homeController.DoneList[index]['task']}");
+                                homeController.txtCategory.value = TextEditingController(text: "${homeController.DoneList[index]['category']}");
                                 Get.defaultDialog(
                                     title: "Upadate Task",
                                     content: Form(
@@ -432,7 +433,7 @@ class _TodoPageState extends State<TodoPage> {
                                                 if(homeController.key.value.currentState!.validate())
                                                 {
                                                   print("==== Start");
-                                                  DoneDatabase.doneDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: index==0?1:index+1);
+                                                  DoneDatabase.doneDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.DoneList[index]['id']);
                                                   print("==== End");
                                                   homeController.GetData2();
                                                   Get.back();
@@ -456,7 +457,7 @@ class _TodoPageState extends State<TodoPage> {
                             SlidableAction(
                               onPressed: (context) {
                                 print("===delet");
-                                DoneDatabase.doneDatabase.DeleteData(id: index==0?1:index+1);
+                                DoneDatabase.doneDatabase.DeleteData(id: homeController.DoneList[index]['id']);
                                 homeController.GetData2();
                               },
                               icon: Icons.delete,
