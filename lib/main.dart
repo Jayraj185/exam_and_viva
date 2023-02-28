@@ -6,11 +6,17 @@ import 'package:exam_and_viva/Screens/TodoScreen/View/SignupPage.dart';
 import 'package:exam_and_viva/Screens/TodoScreen/View/SplashPage.dart';
 import 'package:exam_and_viva/Screens/TodoScreen/View/TodoPage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 
 void main()
 {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(
     Sizer(
       builder: (context, orientation, deviceType) {
