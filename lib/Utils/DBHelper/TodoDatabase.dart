@@ -34,13 +34,13 @@ class TodoDatabase
       path,
       version: 1,
       onCreate: (db, version) {
-        String query = "CREATE TABLE todo (id INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT, category TEXT)";
+        String query = "CREATE TABLE todo (id INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT, category TEXT, date TEXT, month TEXT, year TEXT, status INTEGER, month_int INTEGER)";
         db.execute(query);
       },
     );
   }
 
-  void InsertData({required String task, required String category}) async
+  void InsertData({required String task, required String category, required String month, required String date, required String year, required int status, required int month_int}) async
   {
     database = await CheckDatabase();
 
@@ -48,7 +48,12 @@ class TodoDatabase
         'todo',
         {
           'task' : task,
-          'category' : category
+          'category' : category,
+          'status' : status,
+          'month' : month,
+          'date' : date,
+          'year' : year,
+          'month_int' : month_int,
         }
     );
   }
@@ -64,7 +69,7 @@ class TodoDatabase
     return DataList;
   }
 
-  void UpadateData({required String task, required String category, required int id}) async
+  void UpadateData({required String task, required String month, required int status, required String category, required String date, required String year, required int id, required int month_int}) async
   {
     database = await CheckDatabase();
 
@@ -72,7 +77,12 @@ class TodoDatabase
       'todo',
       {
           'task' : task,
-          'category' : category
+          'category' : category,
+          'status' : status,
+          'month' : month,
+          'date' : date,
+          'year' : year,
+          'month_int' : month_int,
         },
       where: "id = ?",
       whereArgs: [id]

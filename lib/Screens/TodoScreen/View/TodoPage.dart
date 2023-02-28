@@ -1,5 +1,4 @@
 import 'package:exam_and_viva/Screens/HomeScreen/Controller/HomeController.dart';
-import 'package:exam_and_viva/Utils/DBHelper/DoneDatabase.dart';
 import 'package:exam_and_viva/Utils/DBHelper/TodoDatabase.dart';
 import 'package:exam_and_viva/Utils/SharedPreffrence.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +22,7 @@ class _TodoPageState extends State<TodoPage> {
     super.initState();
     homeController.GetMonth();
     homeController.GetData();
-    homeController.GetData2();
+    homeController.GetAllData();
   }
 
   @override
@@ -54,6 +53,7 @@ class _TodoPageState extends State<TodoPage> {
                           height: Get.height/13,
                           child: TextFormField(
                             controller: homeController.txtTask.value,
+                            textAlign: TextAlign.center,
                             decoration: InputDecoration(
                               hintText: "Your Task",
                               border: OutlineInputBorder(
@@ -79,9 +79,9 @@ class _TodoPageState extends State<TodoPage> {
                           height: Get.height/13,
                           child: TextFormField(
                             controller: homeController.txtCategory.value,
+                            textAlign: TextAlign.center,
                             decoration: InputDecoration(
                                 hintText: "Choose Category",
-
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(15),
                                 borderSide: BorderSide(color: Colors.grey)
@@ -109,7 +109,7 @@ class _TodoPageState extends State<TodoPage> {
                               if(homeController.key.value.currentState!.validate())
                                 {
                                   print("==== Start");
-                                  TodoDatabase.todoDatabase.InsertData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text);
+                                  TodoDatabase.todoDatabase.InsertData(task: homeController.txtTask.value.text, status: 0, category:  homeController.txtCategory.value.text,date: "${DateTime.now().day}", month: homeController.month.value, year: "${DateTime.now().year}", month_int: DateTime.now().month);
                                   print("==== End");
                                   homeController.GetData();
                                   Get.back();
@@ -175,167 +175,169 @@ class _TodoPageState extends State<TodoPage> {
                     : Container(
                   height: Get.height/3,
                   width: Get.width,
-                  child: ListView.builder(
-                    itemCount: homeController.TodoList.length,
-                    itemBuilder: (context, index) {
-                      return Slidable(
-                          endActionPane: ActionPane(
-                              motion: StretchMotion(),
-                              children: [
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    DoneDatabase.doneDatabase.InsertData(task: homeController.TodoList[index]['task'], category: homeController.TodoList[index]['category']);
-                                    homeController.GetData2();
-                                    TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
-                                    homeController.GetData();
-                                  },
-                                  icon: Icons.done_all,
-                                  backgroundColor: Colors.green,
-                                  label: "Done",
-                                ),
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    homeController.txtTask.value = TextEditingController(text: "${homeController.TodoList[index]['task']}");
-                                    homeController.txtCategory.value = TextEditingController(text: "${homeController.TodoList[index]['category']}");
-                                    Get.defaultDialog(
-                                        title: "Upadate Task",
-                                        content: Form(
-                                          key: homeController.key.value,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              SizedBox(
-                                                height: Get.height/13,
-                                                child: TextFormField(
-                                                  controller: homeController.txtTask.value,
-                                                  decoration: InputDecoration(
-                                                      hintText: "Your Task",
-                                                      border: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(15),
-                                                          borderSide: BorderSide(color: Colors.grey)
-                                                      ),
-                                                      focusedBorder: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(15),
-                                                          borderSide: BorderSide(color: Colors.grey)
-                                                      )
+                  child: Obx(
+                    () => ListView.builder(
+                      itemCount: homeController.TodoList.length,
+                      itemBuilder: (context, index) {
+                        return Slidable(
+                            endActionPane: ActionPane(
+                                motion: StretchMotion(),
+                                children: [
+                                  SlidableAction(
+                                    onPressed: (context) {
+                                      TodoDatabase.todoDatabase.InsertData(task: homeController.TodoList[index]['task'], category: homeController.TodoList[index]['category'], status: 1, date: homeController.TodoList[index]['date'], month: homeController.TodoList[index]['month'], year: homeController.TodoList[index]['year'],  month_int: homeController.TodoList[index]['month_int']);
+                                      homeController.GetData();
+                                      TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
+                                      homeController.GetData();
+                                    },
+                                    icon: Icons.done_all,
+                                    backgroundColor: Colors.green,
+                                    label: "Done",
+                                  ),
+                                  SlidableAction(
+                                    onPressed: (context) {
+                                      homeController.txtTask.value = TextEditingController(text: "${homeController.TodoList[index]['task']}");
+                                      homeController.txtCategory.value = TextEditingController(text: "${homeController.TodoList[index]['category']}");
+                                      Get.defaultDialog(
+                                          title: "Upadate Task",
+                                          content: Form(
+                                            key: homeController.key.value,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SizedBox(
+                                                  height: Get.height/13,
+                                                  child: TextFormField(
+                                                    controller: homeController.txtTask.value,
+                                                    decoration: InputDecoration(
+                                                        hintText: "Your Task",
+                                                        border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius.circular(15),
+                                                            borderSide: BorderSide(color: Colors.grey)
+                                                        ),
+                                                        focusedBorder: OutlineInputBorder(
+                                                            borderRadius: BorderRadius.circular(15),
+                                                            borderSide: BorderSide(color: Colors.grey)
+                                                        )
+                                                    ),
+                                                    validator: (value) {
+                                                      if(value!.isEmpty)
+                                                      {
+                                                        return "Please Add Your Task";
+                                                      }
+                                                      return null;
+                                                    },
                                                   ),
-                                                  validator: (value) {
-                                                    if(value!.isEmpty)
-                                                    {
-                                                      return "Please Add Your Task";
-                                                    }
-                                                    return null;
-                                                  },
                                                 ),
-                                              ),
-                                              SizedBox(height: Get.height/60,),
-                                              SizedBox(
-                                                height: Get.height/13,
-                                                child: TextFormField(
-                                                  controller: homeController.txtCategory.value,
-                                                  decoration: InputDecoration(
-                                                      hintText: "Choose Category",
-                                                      border: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(15),
-                                                          borderSide: BorderSide(color: Colors.grey)
-                                                      ),
-                                                      focusedBorder: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.circular(15),
-                                                          borderSide: BorderSide(color: Colors.grey)
-                                                      )
+                                                SizedBox(height: Get.height/60,),
+                                                SizedBox(
+                                                  height: Get.height/13,
+                                                  child: TextFormField(
+                                                    controller: homeController.txtCategory.value,
+                                                    decoration: InputDecoration(
+                                                        hintText: "Choose Category",
+                                                        border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius.circular(15),
+                                                            borderSide: BorderSide(color: Colors.grey)
+                                                        ),
+                                                        focusedBorder: OutlineInputBorder(
+                                                            borderRadius: BorderRadius.circular(15),
+                                                            borderSide: BorderSide(color: Colors.grey)
+                                                        )
+                                                    ),
+                                                    validator: (value) {
+                                                      if(value!.isEmpty)
+                                                      {
+                                                        return "Please Choose Category";
+                                                      }
+                                                      return null;
+                                                    },
                                                   ),
-                                                  validator: (value) {
-                                                    if(value!.isEmpty)
-                                                    {
-                                                      return "Please Choose Category";
-                                                    }
-                                                    return null;
-                                                  },
                                                 ),
-                                              ),
-                                              SizedBox(height: Get.height/60,),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                children: [
-                                                  TextButton(onPressed: () => Get.back(), child: Text("Cancel"),),
-                                                  TextButton(onPressed: () {
-                                                    if(homeController.key.value.currentState!.validate())
-                                                    {
-                                                      print("==== Start");
-                                                      TodoDatabase.todoDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.TodoList[index]['id']);
-                                                      print("==== End");
-                                                      homeController.GetData();
-                                                      Get.back();
-                                                    }
-                                                    else
-                                                    {
-                                                      Get.snackbar("Alert","Please Add Your Data");
-                                                    }
-                                                  }, child: Text("Update"),),
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        )
-                                    );
-                                  },
-                                  icon: Icons.edit,
-                                  backgroundColor: Colors.yellowAccent,
-                                  label: "Edit",
-                                ),
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
-                                    homeController.GetData();
-                                  },
-                                  icon: Icons.delete,
-                                  backgroundColor: Colors.red,
-                                  label: "Delete",
-                                ),
-                              ]
-                          ),
-                          child: Container(
-                        height: Get.height/12,
-                        child: Row(
-                          children: [
-                            Container(
-                              height: Get.height,
-                              width: Get.width/45,
-                              color: Colors.teal.shade300,
+                                                SizedBox(height: Get.height/60,),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                  children: [
+                                                    TextButton(onPressed: () => Get.back(), child: Text("Cancel"),),
+                                                    TextButton(onPressed: () {
+                                                      if(homeController.key.value.currentState!.validate())
+                                                      {
+                                                        print("==== Start");
+                                                        TodoDatabase.todoDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.TodoList[index]['id'], status: homeController.TodoList[index]['status'],date: "${homeController.TodoList[index]['date']}", month: "${homeController.TodoList[index]['month']}", year: "${homeController.TodoList[index]['year']}",  month_int: homeController.TodoList[index]['month_int']);
+                                                        print("==== End");
+                                                        homeController.GetData();
+                                                        Get.back();
+                                                      }
+                                                      else
+                                                      {
+                                                        Get.snackbar("Alert","Please Add Your Data");
+                                                      }
+                                                    }, child: Text("Update"),),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          )
+                                      );
+                                    },
+                                    icon: Icons.edit,
+                                    backgroundColor: Colors.yellowAccent,
+                                    label: "Edit",
+                                  ),
+                                  SlidableAction(
+                                    onPressed: (context) {
+                                      TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
+                                      homeController.GetData();
+                                    },
+                                    icon: Icons.delete,
+                                    backgroundColor: Colors.red,
+                                    label: "Delete",
+                                  ),
+                                ]
                             ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: Get.width/60),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${homeController.TodoList[index]['task']}",
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.bold
-                                      ),
-                                    ),
-                                    Text(
-                                      "${homeController.TodoList[index]['category']}",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.bold
-                                      ),
-                                    ),
-                                    SizedBox(height: Get.width/73,),
-                                    Divider(thickness: 1,color: Colors.grey,)
-                                  ],
-                                ),
+                            child: Container(
+                          height: Get.height/12,
+                          child: Row(
+                            children: [
+                              Container(
+                                height: Get.height,
+                                width: Get.width/45,
+                                color: Colors.teal.shade300,
                               ),
-                            )
-                          ],
-                        ),
-                      )
-                      );
-                    },
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: Get.width/60),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${homeController.TodoList[index]['task']}",
+                                        style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text(
+                                        "${homeController.TodoList[index]['category']}",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      SizedBox(height: Get.width/73,),
+                                      Divider(thickness: 1,color: Colors.grey,)
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                        );
+                      },
+                    ),
                   ),
                 ),
                 Container(
@@ -435,9 +437,9 @@ class _TodoPageState extends State<TodoPage> {
                                                   if(homeController.key.value.currentState!.validate())
                                                   {
                                                     print("==== Start");
-                                                    DoneDatabase.doneDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.DoneList[index]['id']);
+                                                    TodoDatabase.todoDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.DoneList[index]['id'],status: homeController.DoneList[index]['status'], date: homeController.DoneList[index]['date'], year: homeController.DoneList[index]['year'], month: homeController.DoneList[index]['month'], month_int: homeController.DoneList[index]['month_int']);
                                                     print("==== End");
-                                                    homeController.GetData2();
+                                                    homeController.GetData();
                                                     Get.back();
                                                   }
                                                   else
@@ -459,8 +461,8 @@ class _TodoPageState extends State<TodoPage> {
                               SlidableAction(
                                 onPressed: (context) {
                                   print("===delet");
-                                  DoneDatabase.doneDatabase.DeleteData(id: homeController.DoneList[index]['id']);
-                                  homeController.GetData2();
+                                  TodoDatabase.todoDatabase.DeleteData(id: homeController.DoneList[index]['id']);
+                                  homeController.GetData();
                                 },
                                 icon: Icons.delete,
                                 backgroundColor: Colors.red,
@@ -516,19 +518,19 @@ class _TodoPageState extends State<TodoPage> {
             ),
           ),
         ),
-        bottomNavigationBar: Obx(
-          () => BottomNavigationBar(
-            currentIndex: homeController.BottomIndex.value,
-            type: BottomNavigationBarType.shifting,
-            onTap: (value) => homeController.BottomIndex.value = value,
-            selectedItemColor: Colors.teal.shade300,
-            unselectedItemColor: Colors.grey,
-            items: [
-              BottomNavigationBarItem(icon: Icon(Icons.home_filled,),label: "Home"),
-              BottomNavigationBarItem(icon: Icon(Icons.calendar_month,),label: "Calender"),
-            ],
-          ),
-        ),
+        // bottomNavigationBar: Obx(
+        //   () => BottomNavigationBar(
+        //     currentIndex: homeController.BottomIndex.value,
+        //     type: BottomNavigationBarType.shifting,
+        //     onTap: (value) => homeController.BottomIndex.value = value,
+        //     selectedItemColor: Colors.teal.shade300,
+        //     unselectedItemColor: Colors.grey,
+        //     items: [
+        //       BottomNavigationBarItem(icon: Icon(Icons.home_filled,),label: "Home"),
+        //       BottomNavigationBarItem(icon: Icon(Icons.calendar_month,),label: "Calender"),
+        //     ],
+        //   ),
+        // ),
       ),
     );
   }

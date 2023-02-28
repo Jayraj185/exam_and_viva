@@ -1,10 +1,12 @@
 import 'dart:async';
 
-import 'package:exam_and_viva/Utils/DBHelper/DoneDatabase.dart';
+import 'package:exam_and_viva/Screens/TodoScreen/View/CalendarPage.dart';
+import 'package:exam_and_viva/Screens/TodoScreen/View/TodoPage.dart';
 import 'package:exam_and_viva/Utils/DBHelper/TodoDatabase.dart';
 import 'package:exam_and_viva/Utils/SharedPreffrence.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HomeController extends GetxController
 {
@@ -25,7 +27,14 @@ class HomeController extends GetxController
   Rx<TextEditingController> txtSignupPass = TextEditingController().obs;
   RxList TodoList = [].obs;
   RxList DoneList = [].obs;
-
+  RxList Screens = [
+    TodoPage(),
+    CalendarPage(),
+  ].obs;
+  Rx<DateTime> focusdate = DateTime.now().obs;
+  Rx<DateTime> selectedDate = DateTime.now().obs;
+  Rx<CalendarFormat> calendarFormat = CalendarFormat.month.obs;
+  RxList AllTaskList = [].obs;
 
   //Only Function's
   void GetMonth()
@@ -82,12 +91,37 @@ class HomeController extends GetxController
 
   void GetData() async
   {
-    TodoList.value = await TodoDatabase.todoDatabase.ReadData();
+    List dataList = await TodoDatabase.todoDatabase.ReadData();
+    TodoList.clear();
+    DoneList.clear();
+    print("========= ${dataList.length}");
+    for(int i=0; i<dataList.length; i++)
+      {
+        print("========= $i  ${dataList[i]['task']}");
+        if(dataList[i]['status'] == 0)
+          {
+            print("if========= $i ${dataList[i]['status']}");
+            TodoList.add(dataList[i]);
+          }
+        else
+          {
+            print("else========= $i ${dataList[i]['status']}");
+            DoneList.add(dataList[i]);
+          }
+      }
   }
 
-  void GetData2() async
+  void GetAllData() async
   {
-    DoneList.value = await DoneDatabase.doneDatabase.ReadData();
+    List dataList = await TodoDatabase.todoDatabase.ReadData();
+    AllTaskList.clear();
+    for(int i=0; i<dataList.length; i++)
+      {
+        if((selectedDate.value.day.toString() == dataList[i]['date']) && (selectedDate.value.month == dataList[i]['month_int']) && (selectedDate.value.year.toString() == dataList[i]['year']))
+          {
+            AllTaskList.add(dataList[i]);
+          }
+      }
   }
 
   void CheckLogin() async
@@ -98,7 +132,7 @@ class HomeController extends GetxController
       {
         if(check)
         {
-          Get.offNamed('todo');
+          Get.offNamed('Bottom');
         }
         else
         {

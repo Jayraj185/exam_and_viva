@@ -1,5 +1,6 @@
 import 'package:exam_and_viva/Screens/HomeScreen/View/HomePage.dart';
 import 'package:exam_and_viva/Screens/PatternScreen/View/PatternPage.dart';
+import 'package:exam_and_viva/Screens/TodoScreen/View/BottomBarPage.dart';
 import 'package:exam_and_viva/Screens/TodoScreen/View/LoginPage.dart';
 import 'package:exam_and_viva/Screens/TodoScreen/View/SignupPage.dart';
 import 'package:exam_and_viva/Screens/TodoScreen/View/SplashPage.dart';
@@ -22,6 +23,7 @@ void main()
             'Splash' : (context) => SplashPage(),
             'Login' : (context) => LoginPage(),
             'Signup' : (context) => SignupPage(),
+            'Bottom' : (context) => BottomBarPage(),
             'todo' : (context) => TodoPage(),
           },
         );

@@ -154,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                         if(login.email == homeController.txtLoginEmail.value.text && login.pass == homeController.txtLoginPass.value.text)
                           {
                             IsLogin(login: true);
-                            Get.offNamed('todo');
+                            Get.offNamed('Bottom');
                           }
                         else
                           {
