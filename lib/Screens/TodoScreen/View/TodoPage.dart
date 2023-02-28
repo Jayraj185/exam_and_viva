@@ -23,6 +23,7 @@ class _TodoPageState extends State<TodoPage> {
     super.initState();
     homeController.GetMonth();
     homeController.GetData();
+    homeController.GetData2();
   }
 
   @override
