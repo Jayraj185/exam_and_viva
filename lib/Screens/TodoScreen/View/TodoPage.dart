@@ -151,50 +151,223 @@ class _TodoPageState extends State<TodoPage> {
         ),
         backgroundColor: Colors.white,
         body: Obx(
-          () => Column(
-            children: [
-              Container(
-                height: Get.height/21,
-                width: Get.width,
-                color: Colors.grey.shade300,
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(left: Get.width/15,),
-                child: Text(
-                    "TODO (${homeController.TodoList.length})",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold
+          () => SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  height: Get.height/21,
+                  width: Get.width,
+                  color: Colors.grey.shade300,
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: Get.width/15,),
+                  child: Text(
+                      "TODO (${homeController.TodoList.length})",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold
+                    ),
                   ),
                 ),
-              ),
-              homeController.TodoList.isEmpty
-                  ? Center(child: Text("Please Add Todo Data"),)
-                  : Container(
-                height: Get.height/3,
-                width: Get.width,
-                child: ListView.builder(
-                  itemCount: homeController.TodoList.length,
-                  itemBuilder: (context, index) {
-                    return Slidable(
+                homeController.TodoList.isEmpty
+                    ? Center(child: Text("Please Add Todo Data"),)
+                    : Container(
+                  height: Get.height/3,
+                  width: Get.width,
+                  child: ListView.builder(
+                    itemCount: homeController.TodoList.length,
+                    itemBuilder: (context, index) {
+                      return Slidable(
+                          endActionPane: ActionPane(
+                              motion: StretchMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (context) {
+                                    DoneDatabase.doneDatabase.InsertData(task: homeController.TodoList[index]['task'], category: homeController.TodoList[index]['category']);
+                                    homeController.GetData2();
+                                    TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
+                                    homeController.GetData();
+                                  },
+                                  icon: Icons.done_all,
+                                  backgroundColor: Colors.green,
+                                  label: "Done",
+                                ),
+                                SlidableAction(
+                                  onPressed: (context) {
+                                    homeController.txtTask.value = TextEditingController(text: "${homeController.TodoList[index]['task']}");
+                                    homeController.txtCategory.value = TextEditingController(text: "${homeController.TodoList[index]['category']}");
+                                    Get.defaultDialog(
+                                        title: "Upadate Task",
+                                        content: Form(
+                                          key: homeController.key.value,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(
+                                                height: Get.height/13,
+                                                child: TextFormField(
+                                                  controller: homeController.txtTask.value,
+                                                  decoration: InputDecoration(
+                                                      hintText: "Your Task",
+                                                      border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(15),
+                                                          borderSide: BorderSide(color: Colors.grey)
+                                                      ),
+                                                      focusedBorder: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(15),
+                                                          borderSide: BorderSide(color: Colors.grey)
+                                                      )
+                                                  ),
+                                                  validator: (value) {
+                                                    if(value!.isEmpty)
+                                                    {
+                                                      return "Please Add Your Task";
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                              ),
+                                              SizedBox(height: Get.height/60,),
+                                              SizedBox(
+                                                height: Get.height/13,
+                                                child: TextFormField(
+                                                  controller: homeController.txtCategory.value,
+                                                  decoration: InputDecoration(
+                                                      hintText: "Choose Category",
+                                                      border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(15),
+                                                          borderSide: BorderSide(color: Colors.grey)
+                                                      ),
+                                                      focusedBorder: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(15),
+                                                          borderSide: BorderSide(color: Colors.grey)
+                                                      )
+                                                  ),
+                                                  validator: (value) {
+                                                    if(value!.isEmpty)
+                                                    {
+                                                      return "Please Choose Category";
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                              ),
+                                              SizedBox(height: Get.height/60,),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                children: [
+                                                  TextButton(onPressed: () => Get.back(), child: Text("Cancel"),),
+                                                  TextButton(onPressed: () {
+                                                    if(homeController.key.value.currentState!.validate())
+                                                    {
+                                                      print("==== Start");
+                                                      TodoDatabase.todoDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.TodoList[index]['id']);
+                                                      print("==== End");
+                                                      homeController.GetData();
+                                                      Get.back();
+                                                    }
+                                                    else
+                                                    {
+                                                      Get.snackbar("Alert","Please Add Your Data");
+                                                    }
+                                                  }, child: Text("Update"),),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        )
+                                    );
+                                  },
+                                  icon: Icons.edit,
+                                  backgroundColor: Colors.yellowAccent,
+                                  label: "Edit",
+                                ),
+                                SlidableAction(
+                                  onPressed: (context) {
+                                    TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
+                                    homeController.GetData();
+                                  },
+                                  icon: Icons.delete,
+                                  backgroundColor: Colors.red,
+                                  label: "Delete",
+                                ),
+                              ]
+                          ),
+                          child: Container(
+                        height: Get.height/12,
+                        child: Row(
+                          children: [
+                            Container(
+                              height: Get.height,
+                              width: Get.width/45,
+                              color: Colors.teal.shade300,
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(left: Get.width/60),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${homeController.TodoList[index]['task']}",
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                    Text(
+                                      "${homeController.TodoList[index]['category']}",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                    SizedBox(height: Get.width/73,),
+                                    Divider(thickness: 1,color: Colors.grey,)
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                      );
+                    },
+                  ),
+                ),
+                Container(
+                  height: Get.height/21,
+                  width: Get.width,
+                  color: Colors.grey.shade300,
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: Get.width/15,),
+                  child: Text(
+                      "DONE (${homeController.DoneList.length})",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
+                ),
+                homeController.DoneList.isEmpty
+                    ? Center(child: Text("Please Todo Data Slide And Click Done Button"),)
+                    : Container(
+                  height: Get.height/3,
+                  width: Get.width,
+                  child: ListView.builder(
+                    itemCount: homeController.DoneList.length,
+                    itemBuilder: (context, index) {
+                      return Slidable(
                         endActionPane: ActionPane(
                             motion: StretchMotion(),
                             children: [
                               SlidableAction(
                                 onPressed: (context) {
-                                  DoneDatabase.doneDatabase.InsertData(task: homeController.TodoList[index]['task'], category: homeController.TodoList[index]['category']);
-                                  homeController.GetData2();
-                                  TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
-                                  homeController.GetData();
-                                },
-                                icon: Icons.done_all,
-                                backgroundColor: Colors.green,
-                                label: "Done",
-                              ),
-                              SlidableAction(
-                                onPressed: (context) {
-                                  homeController.txtTask.value = TextEditingController(text: "${homeController.TodoList[index]['task']}");
-                                  homeController.txtCategory.value = TextEditingController(text: "${homeController.TodoList[index]['category']}");
+                                  homeController.txtTask.value = TextEditingController(text: "${homeController.DoneList[index]['task']}");
+                                  homeController.txtCategory.value = TextEditingController(text: "${homeController.DoneList[index]['category']}");
                                   Get.defaultDialog(
                                       title: "Upadate Task",
                                       content: Form(
@@ -233,6 +406,7 @@ class _TodoPageState extends State<TodoPage> {
                                                 controller: homeController.txtCategory.value,
                                                 decoration: InputDecoration(
                                                     hintText: "Choose Category",
+
                                                     border: OutlineInputBorder(
                                                         borderRadius: BorderRadius.circular(15),
                                                         borderSide: BorderSide(color: Colors.grey)
@@ -260,9 +434,9 @@ class _TodoPageState extends State<TodoPage> {
                                                   if(homeController.key.value.currentState!.validate())
                                                   {
                                                     print("==== Start");
-                                                    TodoDatabase.todoDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.TodoList[index]['id']);
+                                                    DoneDatabase.doneDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.DoneList[index]['id']);
                                                     print("==== End");
-                                                    homeController.GetData();
+                                                    homeController.GetData2();
                                                     Get.back();
                                                   }
                                                   else
@@ -283,8 +457,9 @@ class _TodoPageState extends State<TodoPage> {
                               ),
                               SlidableAction(
                                 onPressed: (context) {
-                                  TodoDatabase.todoDatabase.DeleteData(id: homeController.TodoList[index]['id']);
-                                  homeController.GetData();
+                                  print("===delet");
+                                  DoneDatabase.doneDatabase.DeleteData(id: homeController.DoneList[index]['id']);
+                                  homeController.GetData2();
                                 },
                                 icon: Icons.delete,
                                 backgroundColor: Colors.red,
@@ -293,224 +468,51 @@ class _TodoPageState extends State<TodoPage> {
                             ]
                         ),
                         child: Container(
-                      height: Get.height/12,
-                      child: Row(
-                        children: [
-                          Container(
-                            height: Get.height,
-                            width: Get.width/45,
-                            color: Colors.teal.shade300,
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(left: Get.width/60),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${homeController.TodoList[index]['task']}",
-                                    style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                  Text(
-                                    "${homeController.TodoList[index]['category']}",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                  SizedBox(height: Get.width/73,),
-                                  Divider(thickness: 1,color: Colors.grey,)
-                                ],
+                          height: Get.height/12,
+                          child: Row(
+                            children: [
+                              Container(
+                                height: Get.height,
+                                width: Get.width/45,
+                                color: Colors.green,
                               ),
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                    );
-                  },
-                ),
-              ),
-              Container(
-                height: Get.height/21,
-                width: Get.width,
-                color: Colors.grey.shade300,
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(left: Get.width/15,),
-                child: Text(
-                    "DONE (${homeController.DoneList.length})",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: Get.width/60),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${homeController.DoneList[index]['task']}",
+                                        style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text(
+                                        "${homeController.DoneList[index]['category']}",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      SizedBox(height: Get.width/73,),
+                                      Divider(thickness: 1,color: Colors.grey,)
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
-              homeController.DoneList.isEmpty
-                  ? Center(child: Text("Please Todo Data Slide And Click Done Button"),)
-                  : Container(
-                height: Get.height/3,
-                width: Get.width,
-                child: ListView.builder(
-                  itemCount: homeController.DoneList.length,
-                  itemBuilder: (context, index) {
-                    return Slidable(
-                      endActionPane: ActionPane(
-                          motion: StretchMotion(),
-                          children: [
-                            SlidableAction(
-                              onPressed: (context) {
-                                homeController.txtTask.value = TextEditingController(text: "${homeController.DoneList[index]['task']}");
-                                homeController.txtCategory.value = TextEditingController(text: "${homeController.DoneList[index]['category']}");
-                                Get.defaultDialog(
-                                    title: "Upadate Task",
-                                    content: Form(
-                                      key: homeController.key.value,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(
-                                            height: Get.height/13,
-                                            child: TextFormField(
-                                              controller: homeController.txtTask.value,
-                                              decoration: InputDecoration(
-                                                  hintText: "Your Task",
-                                                  border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(15),
-                                                      borderSide: BorderSide(color: Colors.grey)
-                                                  ),
-                                                  focusedBorder: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(15),
-                                                      borderSide: BorderSide(color: Colors.grey)
-                                                  )
-                                              ),
-                                              validator: (value) {
-                                                if(value!.isEmpty)
-                                                {
-                                                  return "Please Add Your Task";
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                          ),
-                                          SizedBox(height: Get.height/60,),
-                                          SizedBox(
-                                            height: Get.height/13,
-                                            child: TextFormField(
-                                              controller: homeController.txtCategory.value,
-                                              decoration: InputDecoration(
-                                                  hintText: "Choose Category",
-
-                                                  border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(15),
-                                                      borderSide: BorderSide(color: Colors.grey)
-                                                  ),
-                                                  focusedBorder: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(15),
-                                                      borderSide: BorderSide(color: Colors.grey)
-                                                  )
-                                              ),
-                                              validator: (value) {
-                                                if(value!.isEmpty)
-                                                {
-                                                  return "Please Choose Category";
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                          ),
-                                          SizedBox(height: Get.height/60,),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              TextButton(onPressed: () => Get.back(), child: Text("Cancel"),),
-                                              TextButton(onPressed: () {
-                                                if(homeController.key.value.currentState!.validate())
-                                                {
-                                                  print("==== Start");
-                                                  DoneDatabase.doneDatabase.UpadateData(task: homeController.txtTask.value.text, category:  homeController.txtCategory.value.text,id: homeController.DoneList[index]['id']);
-                                                  print("==== End");
-                                                  homeController.GetData2();
-                                                  Get.back();
-                                                }
-                                                else
-                                                {
-                                                  Get.snackbar("Alert","Please Add Your Data");
-                                                }
-                                              }, child: Text("Update"),),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                );
-                              },
-                              icon: Icons.edit,
-                              backgroundColor: Colors.yellowAccent,
-                              label: "Edit",
-                            ),
-                            SlidableAction(
-                              onPressed: (context) {
-                                print("===delet");
-                                DoneDatabase.doneDatabase.DeleteData(id: homeController.DoneList[index]['id']);
-                                homeController.GetData2();
-                              },
-                              icon: Icons.delete,
-                              backgroundColor: Colors.red,
-                              label: "Delete",
-                            ),
-                          ]
-                      ),
-                      child: Container(
-                        height: Get.height/12,
-                        child: Row(
-                          children: [
-                            Container(
-                              height: Get.height,
-                              width: Get.width/45,
-                              color: Colors.green,
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: Get.width/60),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${homeController.DoneList[index]['task']}",
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.bold
-                                      ),
-                                    ),
-                                    Text(
-                                      "${homeController.DoneList[index]['category']}",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.bold
-                                      ),
-                                    ),
-                                    SizedBox(height: Get.width/73,),
-                                    Divider(thickness: 1,color: Colors.grey,)
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: Obx(
